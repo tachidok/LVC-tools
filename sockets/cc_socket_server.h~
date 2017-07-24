@@ -1,0 +1,55 @@
+#ifndef CC_SOCKET_SERVER_H
+#define CC_SOCKET_SERVER_H
+
+#include "ac_socket.h"
+
+/*! @brief La clase CCCommunicationServer implementa un servidor para conexion TCP/IP, utilizando sockets bajo el estándar POSIX. Soportando un solo cliente
+    @author Laboratorio de Vision por Computadora (LVC)
+    @version 3A
+    @date Diciembre 2017
+*/
+
+class CCCommunicationServer : public virtual CACommunicationEthernet
+{
+public:
+    CCCommunicationServer(const string &_configFile, const string &classname);
+    ~CCCommunicationServer();
+        
+    /*! Inicializa el estado de la conexion y establece el numero de puerto en el que se escucharan las conexiones entrantes.
+    @param _configFile [in] Nombre del archivo que contiene los datos de inicializacion.
+    @param _ classname [in] Nombre del tipo de clase que contiene los datos de inicializacion.
+    */
+    void initialization(const string &_configFile, const string &classname);
+
+    /*! Abre el servidor para aceptar conexiones entrantes. Esta funcion se bloquea hasta que se reciba una conexion entrante
+    */
+    bool openCommunication();
+
+    /*!	Termina todas las comunicaciones establecidas, y cierra el puerto de escucha.
+    */
+    void closeCommunication();
+
+    /*!	Cierra la conexion y vuelve a abrirla.
+    */
+    void reconnect();
+
+    /*!	Envia los datos contenidos en el mensaje que se le pasa como parametro.
+    @param _buffer [in] Buffer que contiene el mensaje a enviar.
+    @param _size [in] Numero de bytes que se desean enviar. Los bytes enviados corresponden a mensaje[0] ... mensaje[nBytes-1].
+    @return Numero de bytes escritos. -1 en caso de ocurrir algun error.
+    */
+    int write(unsigned char *_buffer, int size);
+
+    /*!	Lee los datos que se encuentran en el buffer de entrada. Esta funcion se bloquea hasta que el buffer contenga el numero de bytes especificado por nBytes, o se detecte algun error.
+    @param _buffer [out] Mensaje recibido.
+    @param _size [in] Numero de bytes que se deben leer.
+    @return Numero de bytes leidos. -1 en caso de ocurrir algun error.
+    */
+    int read(unsigned char *_buffer, int size);
+
+private:
+
+    int newSockFd;//!< Identificador del socket del servidor.
+};
+
+#endif // CC_SOCKET_SERVER_H

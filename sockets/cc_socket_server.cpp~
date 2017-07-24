@@ -1,0 +1,149 @@
+#include "CCCommunicationServer.h"
+
+extern CCReport report;
+extern CCMonitor monitor;
+
+CCCommunicationServer::CCCommunicationServer(const string &_configFile, const string &classname)
+{
+    report.updateMessageRecord(string(__PRETTY_FUNCTION__));
+    initialization(_configFile, classname);
+}
+
+CCCommunicationServer::~CCCommunicationServer()
+{
+    report.updateMessageRecord(string(__PRETTY_FUNCTION__));
+    closeCommunication();
+}
+    
+void CCCommunicationServer::initialization(const string &_configFile, const string &classname)
+{
+
+    fd = -1;
+    newSockFd = -1;
+    status = CI_DISCONNECTED;
+
+    CCConfigFile cfg(_configFile);
+
+    port = cfg.getValueOfInt(classname + ".port");
+
+}
+
+bool CCCommunicationServer::openCommunication()
+{
+
+    socklen_t clilen;
+    struct sockaddr_in serv_addr, cli_addr;
+    
+    //check that  is not already connected
+    if (status == CI_CONNECTED){
+        //report.warningMessage(string(__PRETTY_FUNCTION__) + ": already connected");
+        return true;
+    }
+
+    //Create a socket with the socket() system call
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+
+
+    if (fd < 0) {
+        status = CI_DISCONNECTED;
+        report.errorMessage(string(__PRETTY_FUNCTION__) + ": opening socket");
+        return false;
+    }
+
+    int enable=1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int))< 0)
+        report.errorMessage("SO_REUSE");
+
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(port);
+
+#ifdef GOMEZ_MESSAGES
+    fprintf (stderr, "%d\n", port);
+#endif // #ifdef GOMEZ_MESSAGES
+    //Bind the socket to an address using the bind() system call.
+    //For a server socket on the Internet, an address consists of a port number on the host machine.
+    if (bind(fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0){
+        status = CI_DISCONNECTED;
+        close(fd);
+        report.errorMessage(string(__PRETTY_FUNCTION__) + ": Failed  to bind an address to the socket server ");
+        return false;
+    }
+
+    //Listen for connections with the listen() system call
+    listen(fd, 1);
+    status = CI_CONNECTING;
+
+    clilen = sizeof(cli_addr);
+
+    //Accept a connection with the accept() system call.
+    //This call typically blocks until a client connects with the server.
+    newSockFd = accept(fd, (struct sockaddr *) &cli_addr, &clilen);
+
+    if (newSockFd < 0) {
+        status = CI_DISCONNECTED;
+        close(fd);
+        report.errorMessage(string(__PRETTY_FUNCTION__) + ": Could not create client socket in the server");
+        return false;
+    }
+
+    status = CI_CONNECTED;
+
+    return true;
+
+}
+
+void CCCommunicationServer::closeCommunication()
+{
+    if (status == CI_CONNECTED)  {
+        status = CI_DISCONNECTED;
+
+        if (newSockFd >= 0)
+            close(newSockFd);
+
+        if (fd >= 0)
+            close(fd);
+    }
+}
+
+void CCCommunicationServer::reconnect()
+{
+    closeCommunication();
+    openCommunication();
+}
+
+int CCCommunicationServer::write(unsigned char *_buffer, int size)
+{
+
+    if (status != CI_CONNECTED) {
+        //report.warningMessage(string(__PRETTY_FUNCTION__) + ":there is not connected socket");
+        return -1;
+    }
+
+    int n = ::write(newSockFd, _buffer, size);
+
+    if (n < 0)
+        closeCommunication();
+
+    return n;
+    
+}
+
+int CCCommunicationServer::read(unsigned char *_buffer, int size)
+{
+
+    if (status != CI_CONNECTED) {
+        //report.warningMessage(string(__PRETTY_FUNCTION__) + ":there is not connected socket");
+        return -1;
+    }
+
+    int n = ::read(newSockFd, _buffer, size);
+
+    if (n < 0)
+        closeCommunication();
+
+    return n;
+    
+}
