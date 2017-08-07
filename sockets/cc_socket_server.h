@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-enum Server_socket_status {SERVER_INITIALISED, SERVER_LISTENING, SERVER_STOPPED};
+enum Server_socket_status {SERVER_STARTED, SERVER_CONNECTED, SERVER_DISCONNECTED, SERVER_STOPPED};
 
 /// @class CCSocketServer implements a POSIX server for a TCP/IP
 /// connection, currently this class only supports one client TODO:
@@ -27,16 +27,13 @@ class CCSocketServer
  public:
  
  /// Constructor
- CCSocketServer(const int listening_port);
+ CCSocketServer(string server_name, const int listening_port);
  
  /// Destructor
  ~CCSocketServer();
  
- /// Initiliase the server and let it ready to lister for client connections
- bool initialise();
- 
- /// Listen for clients trying to connect (blocking until a client gets connected)
- bool listen();
+ /// Start the server and waits for incomming connections from clients (blocking)
+ bool start();
  
  /// Stop the server
  void stop();
@@ -48,6 +45,9 @@ class CCSocketServer
  int receive(unsigned char *buffer, const int size);
  
  private:
+
+ /// Stores the server name
+ string Server_name;
  
  /// File descriptor for the server
  int FD_server;

@@ -3,11 +3,14 @@
 /// ==================================================================
 /// Constructor
 /// ==================================================================
-CCSocketServer::CCSocketServer(const int listening_port) 
+CCSocketServer::CCSocketServer(string server_name, const int listening_port) 
 {
  /// Initiliase file descriptors
  FD_server = -1;
  FD_client = -1;
+ 
+ // Store the name of the server
+ Server_name = server_name;
  
  // Sets the listerning port
  Listening_port = listening_port;
@@ -26,122 +29,125 @@ CCSocketServer::~CCSocketServer()
  stop();
 }
 
-bool CCSocketServer::initialise()
-{
- //// HERE HERE HERE HERE
+bool CCSocketServer::start()
+{ 
+ // A data structure to store client lenght information
+ socklen_t client_length;
  
- socklen_t clilen;
- struct sockaddr_in serv_addr, cli_addr;
-    
- //check that  is not already connected
- if (status == CI_CONNECTED){
-  //report.warningMessage(string(__PRETTY_FUNCTION__) + ": already connected");
-  return true;
- }
+ // Store server and client address information
+ struct sockaddr_in server_address; 
+ struct sockaddr_in client_address;
+ 
+ //check that the server is not already connected
+ if (Status == SERVER_STARTED)
+  {
+   return false;
+  }
+ 
+ // Create a socket
+ FD_server = socket(AF_INET, SOCK_STREAM, 0);
+ if (FD_server < 0)
+  {
+   Status = SERVER_STOPPED;
+   return false;
+  }
 
- //Create a socket with the socket() system call
- fd = socket(AF_INET, SOCK_STREAM, 0);
+ /// Allows the reuse of local addresses when calling bind()
+ int allow_reuse = 1;
+ if (setsockopt(FD_server, SOL_SOCKET, SO_REUSEADDR, &allow_reuse, sizeof(int))< 0)
+  {
+   return false; 
+  }
 
- if (fd < 0) {
-  status = CI_DISCONNECTED;
-  report.errorMessage(string(__PRETTY_FUNCTION__) + ": opening socket");
-  return false;
- }
+ // Fill with zeroes the given structure
+ bzero((char *) &server_address, sizeof(server_address));
 
- int enable=1;
- if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int))< 0)
-  report.errorMessage("SO_REUSE");
-
- bzero((char *) &serv_addr, sizeof(serv_addr));
-
- serv_addr.sin_family = AF_INET;
- serv_addr.sin_addr.s_addr = INADDR_ANY;
- serv_addr.sin_port = htons(port);
-
-#ifdef GOMEZ_MESSAGES
- fprintf (stderr, "%d\n", port);
-#endif // #ifdef GOMEZ_MESSAGES
- //Bind the socket to an address using the bind() system call.
- //For a server socket on the Internet, an address consists of a port number on the host machine.
- if (bind(fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0){
-  status = CI_DISCONNECTED;
-  close(fd);
-  report.errorMessage(string(__PRETTY_FUNCTION__) + ": Failed  to bind an address to the socket server ");
-  return false;
- }
-
- //Listen for connections with the listen() system call
- listen(fd, 1);
- status = CI_CONNECTING;
-
- clilen = sizeof(cli_addr);
-
- //Accept a connection with the accept() system call.
- //This call typically blocks until a client connects with the server.
- newSockFd = accept(fd, (struct sockaddr *) &cli_addr, &clilen);
-
- if (newSockFd < 0) {
-  status = CI_DISCONNECTED;
-  close(fd);
-  report.errorMessage(string(__PRETTY_FUNCTION__) + ": Could not create client socket in the server");
-  return false;
- }
-
- status = CI_CONNECTED;
-
+ // Configure server and indicate listerning port
+ server_address.sin_family = AF_INET;
+ server_address.sin_addr.s_addr = INADDR_ANY;
+ server_address.sin_port = htons(Listening_port);
+ 
+ // Bind the socket to an port in the local machine using the bind()
+ // system call.
+ if (bind(FD_server, (struct sockaddr *) &server_address, sizeof(server_address)) < 0)
+  {
+   Status = SERVER_STOPPED;
+   close(FD_server);
+   return false;
+  }
+  
+ // Start listening for connections using the listen() system call
+ listen(FD_server, 1);
+ 
+ // Set the status to started
+ Status = SERVER_STARTED;
+ 
+ std::cout << "Socket Server [" << Server_name << "] started and listening ..." << std::endl;
+ 
+ // Prepare to accept a client
+ client_length = sizeof(client_address);
+ 
+ // Accept an incomming client connection using the accept() system call.
+ FD_client = accept(FD_server, (struct sockaddr *) &client_address, &client_length);
+ 
+ if (FD_client < 0)
+  {
+   Status = SERVER_STOPPED;
+   close(FD_server);
+   return false;
+  }
+ 
+ Status = SERVER_CONNECTED;
+ 
+ std::cout << "Socket Server [" << Server_name << "] connected" << std::endl;
+ 
  return true;
 
 }
 
-void CCSocketServer::closeCommunication()
+void CCSocketServer::stop()
 {
- if (status == CI_CONNECTED)  {
-  status = CI_DISCONNECTED;
+ if (Status == SERVER_CONNECTED)
+  {
+   Status = SERVER_DISCONNECTED; 
+   
+   if (FD_client >= 0)
+    {
+     close(FD_client);
+    }
+   
+   Status = SERVER_STOPPED;
+   
+   if (FD_server >= 0)
+    {
+     close(FD_server);
+    }
+  }
+ 
+}
+ 
+int CCSocketServer::send(unsigned char *buffer, const int size)
+{
+ // Check that the server is connected with a client
+ if (Status != SERVER_CONNECTED)
+  {
+   return -1;
+  }
 
-  if (newSockFd >= 0)
-   close(newSockFd);
-
-  if (fd >= 0)
-   close(fd);
- }
+ // Send data and get the number of sent data
+ return ::write(FD_client, buffer, size);
+ 
 }
 
-void CCSocketServer::reconnect()
+int CCSocketServer::read(unsigned char *buffer, const int size)
 {
- closeCommunication();
- openCommunication();
-}
-
-int CCSocketServer::write(unsigned char *_buffer, int size)
-{
-
- if (status != CI_CONNECTED) {
-  //report.warningMessage(string(__PRETTY_FUNCTION__) + ":there is not connected socket");
-  return -1;
- }
-
- int n = ::write(newSockFd, _buffer, size);
-
- if (n < 0)
-  closeCommunication();
-
- return n;
-    
-}
-
-int CCSocketServer::read(unsigned char *_buffer, int size)
-{
-
- if (status != CI_CONNECTED) {
-  //report.warningMessage(string(__PRETTY_FUNCTION__) + ":there is not connected socket");
-  return -1;
- }
-
- int n = ::read(newSockFd, _buffer, size);
-
- if (n < 0)
-  closeCommunication();
-
- return n;
-    
+ // Check that the server is connected with a client
+ if (Status != SERVER_CONNECTED)
+  {
+   return -1;
+  }
+ 
+ // Get the data and the number of received data
+ return ::read(FD_client, buffer, size);
+ 
 }
