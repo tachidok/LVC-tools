@@ -11,7 +11,7 @@
 // Include the external package for serial communication
 #include "../../external_src/serial_rs-232/rs232.h"
 
-namespace chapchom
+namespace lvc_tools
 {
  
  // Enumerator to indicate whether the connection has been established
@@ -55,6 +55,9 @@ namespace chapchom
   
   // Destructor
   ~CCSerial();
+  
+  // Try to establish a connection
+  bool try_to_connect();
   
   // Send data
   const int send_data(const unsigned char *data, const unsigned n_send_data);

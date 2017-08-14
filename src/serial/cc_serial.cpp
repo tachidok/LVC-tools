@@ -3,7 +3,7 @@
 
 #include "cc_serial.h"
 
-namespace chapchom
+namespace lvc_tools
 {
  
  // ===================================================================
@@ -16,276 +16,114 @@ namespace chapchom
  CCSerial::CCSerial(std::string communication_name,
                     std::string port_name, const unsigned baudrate,
                     SERIAL_N_BITS n_data_bits = 8BITS,
-                    SERIAL_PARITY parity = NONE,
+                    SERIAL_PARITY Parity = NONE,
                     SERIAL_STOP_BITS n_stop_bits = ONE)
   : Communication_name(communication_name),
     Port_name(port_name),
     Baudrate(baudrate),
     N_data_bits(n_data_bits),
-    Parity(parity),
+    Parity(Parity),
     N_stop_bits(n_stop_bits)
  {
   // Initialise connection as disconnected
-  Communication_status = SERIAL_DISCONNECTED; 
+  Communication_status = SERIAL_DISCONNECTED;
  }
   
  // ===================================================================
  // Destructor
  // ===================================================================
  template<class T>
- CCSerial<T>::~CCSerial()
+ CCSerial::~CCSerial()
  {
+  // Change to disconnected state
+  Communication_status = SERIAL_DISCONNECTED;
+  
   RS232_CloseComport();
- }
- 
- // ===================================================================
- // Transforms the input values vector to a Data class type
- // ===================================================================
- template<class T>
- void CCData<T>::set_values(const T *values_pt)
- {
-  // Clean any possible previously allocated memory
-  clean_up();
-  
-  // Allocate memory for Values_pt vector
-  Values_pt = new T[N_values*N_history_values];
-  
-  // Copy the values (an element by element copy, uff!!)
-  std::memcpy(Values_pt, values_pt, N_values*N_history_values*sizeof(T));
-  
-  // Mark the Values_pt vector as having elements
-  Is_values_empty = false;
-  
- }
- 
- // ===================================================================
- // Clean up for any dynamically stored data
- // ===================================================================
- template<class T>
- void CCData<T>::clean_up()
- {
-  // Check whether the Values_pt vector has got something in it
-  if (!Is_values_empty)
-   {
-    // Mark as deleteable
-    Delete_values_storage = true;
-    // Free memory
-    free_memory_of_values();
-   }
-  
-  // Set the pointer to NULL
-  Values_pt = 0;
-  
-  if (!Is_status_empty)
-   {
-    // Free memory for pin status
-    delete [] Status_pt;
-    // Mark the Status_pt vector as having no elements
-    Is_status_empty = true;
-   }
-  
-  Status_pt = 0;
-  
- }
- 
- // ===================================================================
- // Free allocated memory
- // ===================================================================
- template<class T>
- void CCData<T>::free_memory_of_values()
- {
-  // Is the Values_pt vector allowed for deletion. If this method is
-  // called from an external source we need to check whether the
-  // values has been marked for deletion
-  if (Delete_values_storage)
-   {
-    delete [] Values_pt;
-    Values_pt = 0;
-    
-    // Mark as empty
-    Is_values_empty=true;
-    
-   } // if (Delete_values_storage)
-  else
-   {
-    // Error message
-    std::ostringstream error_message;
-    error_message << "You are trying to free the memory of a data object that is\n"
-                  << "not marked as deletable" << std::endl;
-    throw ChapchomLibError(error_message.str(),
-                           CHAPCHOM_CURRENT_FUNCTION,
-                           CHAPCHOM_EXCEPTION_LOCATION);
-   }
-  
- }
- 
- // ===================================================================
- // Get the specified value (read-only)
- // ===================================================================
- template<class T>
- const T CCData<T>::value(const unsigned &i, const unsigned t) const
- {
-  // TODO: Julio - Implement range check access
-  return Values_pt[i*N_history_values+t];
- }
- 
- // ===================================================================
- // Set values (write version)
- // ===================================================================
- template<class T>
- T &CCData<T>::value(const unsigned &i, const unsigned t)
- {
-  // TODO: Julio - Implement range check access
-  return Values_pt[i*N_history_values+t];
- }
- 
- // ===================================================================
- // Output the values vector (matrix)
- // ===================================================================
- template<class T>
- void CCData<T>::output(bool output_indexes) const
- {
-  if (Is_values_empty)
-   {
-    // Error message
-    std::ostringstream error_message;
-    error_message << "The Values_pt vector is empty" << std::endl;
-    throw ChapchomLibError(error_message.str(),
-                           CHAPCHOM_CURRENT_FUNCTION,
-                           CHAPCHOM_EXCEPTION_LOCATION);
-   }
-  else
-   {
-    // Check whether we should output the indexes
-    if (output_indexes)
-     {
-      for (unsigned i = 0; i < N_values; i++)
-       {
-        for (unsigned j = 0; j < N_history_values; j++)
-         {
-          std::cout << "(" << i << ", " << j << "): "
-                    << Values_pt[i*N_history_values+j]
-                    << std::endl; 
-         } // for (j < N_history_values)
-       } // for (i < N_values)
-     } // if (output_indexes)
-    else
-     {
-      for (unsigned i = 0; i < N_values; i++)
-       {
-        for (unsigned j = 0; j < N_history_values; j++)
-         {
-          std::cout << Values_pt[i*N_history_values+j] << " ";
-         } // for (j < N_history_values)
-        std::cout << std::endl;
-       } // for (i < N_values)
-     } // else if (output_indexes)
-    
-   }
-  
- }
- 
- // ===================================================================
- // Output the matrix
- // ===================================================================
- template<class T>
- void CCData<T>::output(std::ofstream &outfile,
-                          bool output_indexes) const
- {
-  if (Is_values_empty)
-   {
-    // Error message
-    std::ostringstream error_message;
-    error_message << "The Values_pt vector is empty" << std::endl;
-    throw ChapchomLibError(error_message.str(),
-                           CHAPCHOM_CURRENT_FUNCTION,
-                           CHAPCHOM_EXCEPTION_LOCATION);
-   }
-  else
-   {
-    // Check whether we should output the indexes
-    if (output_indexes)
-     {
-      for (unsigned i = 0; i < N_values; i++)
-       {
-        for (unsigned j = 0; j < N_history_values; j++)
-         {
-          outfile << "(" << i << ", " << j << "): "
-                  << Values_pt[i*N_history_values+j]
-                  << std::endl; 
-         } // for (j < N_history_values)
-       } // for (i < N_values)
-     } // if (output_indexes)
-    else
-     {
-      for (unsigned i = 0; i < N_values; i++)
-       {
-        for (unsigned j = 0; j < N_history_values; j++)
-         {
-          outfile << Values_pt[i*N_history_values+j] << " ";
-         } // for (j < N_history_values)
-        outfile << std::endl;
-       } // for (i < N_values)
-     } // else if (output_indexes)
-    
-   }
-  
- }
- 
- // ===================================================================
- // Creates a zero Values_pt and Status_pt vectors with the given
- // number of elements
- // ===================================================================
- template<class T>
- void CCData<T>::create_zero_values_and_status_vectors()
- {
-  // Delete any Values_pt in memory
-  clean_up();
-  
-  // Allocate memory for Values_pt
-  Values_pt = new T[N_values*N_history_values];
-  // Allocate memory for Status_pt
-  Status_pt = new Data_status[N_values];
-  // Set status as undefined
-  for (unsigned i = 0; i < N_values; i++)
-   {
-    Status_pt[i] = UNDEFINED;
-   }
-  
-  // Mark the vectors as having something
-  Is_values_empty=false;
-  Is_status_empty=false;
-  
- }
- 
- // ===================================================================
- // Pins all the values associated with this data
- // ===================================================================
- template<class T>
- void CCData<T>::pin_all()
- {
-  if (!Is_status_empty)
-   {
-    for (unsigned i = 0; i < N_values; i++)
-     {
-      Status_pt[i] = PINNED;
-     }
-   }
  }
 
  // ===================================================================
- // Unpins all the values associated with this data
+ // Try to establish a connection
  // ===================================================================
- template<class T>
- void CCData<T>::unpin_all()
- {
-  if (!Is_status_empty)
+ bool CCSerial::try_to_connect()
+ {  
+  // Get the port number
+  const unsigned int port_number = RS232_GetPortnr(Port_name);
+  
+  // Set the mode
+  char mode[3];
+  if (N_data_bits == 8BITS)
    {
-    for (unsigned i = 0; i < N_values; i++)
-     {
-      Status_pt[i] = UNPINNED;
-     }
+    mode[0] = '8';
    }
+  else if (N_data_bits == 7BITS)
+   {
+    mode[0] = '7';
+   }
+  else if (N_data_bits == 6BITS)
+   {
+    mode[0] = '6';
+   }
+  else if (N_data_bits == 5BITS)
+   {
+    mode[0] = '5';
+   }
+  else
+   {
+    ostream error_message;
+    error_message << "Non supported number of data bits\nYou asked for ["
+                  << N_data_bits << "] n data bits, but the supported ones are:\n"
+                  << "8BITS, 7BITS, 6BITS and 5BITS data bits\n";
+    ERROR_MESSAGE(error_message);
+   }
+
+  if (Parity == NONE)
+   {
+    mode[1] = 'N';
+   }
+  else if (Parity == EVEN)
+   {
+    mode[1] = 'E';
+   }
+  else if (Parity == EVEN)
+   {
+    mode[1] = 'O';
+   }
+  else
+   {
+    ostream error_message;
+    error_message << "Non supported parity\nYou asked for ["
+                  << Parity << "] parity, but the supported ones are:\n"
+                  << "NONE, EVEN or ODD\n";
+    ERROR_MESSAGE(error_message);
+   }
+
+  if (N_stop_bits == ONE)
+   {
+    mode[2] = '1';
+   }
+  else if (N_stop_bits == TWO)
+   {
+    mode[2] = '2';
+   }
+  else
+   {
+    ostream error_message;
+    error_message << "Non supported number of stop bits\nYou asked for ["
+                  << N_stop_bits << "] n stop bits, but the supported ones are:\n"
+                  << "ONE and TWO\n";
+    ERROR_MESSAGE(error_message);
+   }
+
+  // Try to open the serial port
+  if (RS232_OpenComport(port_number, Baudrate, mode))
+   {
+    return false;
+   }
+  
+  // Change to connected state
+  Communication_status = SERIAL_CONNECTED;
+  
+  return true;
  }
- 
+  
 }
