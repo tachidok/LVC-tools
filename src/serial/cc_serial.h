@@ -6,7 +6,6 @@
 #define CCSERIAL_H
 
 #include "../general/common_includes.h"
-#include "../general/utilities.h"
 
 // Include the external package for serial communication
 #include "../../external_src/serial_rs-232/rs232.h"
@@ -18,7 +17,7 @@ namespace lvc_tools
  // or not
  enum SERIAL_STATUS {SERIAL_CONNECTED, SERIAL_DISCONNECTED};
  // Enumerators to pass supported values to the serial port configuration
- enum SERIAL_N_DATA_BITS {8BITS, 7BITS, 6BITS, 5BITS};
+ enum SERIAL_N_DATA_BITS {N8BITS, N7BITS, N6BITS, N5BITS};
  enum SERIAL_PARITY {NONE, EVEN, ODD};
  enum SERIAL_STOP_BITS {ONE, TWO};
  
@@ -37,12 +36,13 @@ namespace lvc_tools
   // baudrate, we will take care of the rest
   CCSerial(std::string communication_name,
            std::string port_name, const unsigned baudrate,
-           SERIAL_N_BITS n_data_bits = 8BITS,
+           SERIAL_N_DATA_BITS n_data_bits = N8BITS,
            SERIAL_PARITY parity = NONE,
            SERIAL_STOP_BITS n_stop_bits = ONE);
   
   // Copy constructor
   CCSerial(const CCSerial &copy)
+   : Baudrate(0)
    {
     ERROR_MESSAGE("Undefined behaviour for copy constructor");
    }
@@ -59,11 +59,14 @@ namespace lvc_tools
   // Try to establish a connection
   bool try_to_connect();
   
-  // Send data
-  const int send_data(const unsigned char *data, const unsigned n_send_data);
+  // Disconnects
+  void disconnect();
   
-  // Receive data in buffer
-  const int receive_data(const unsigned char *buffer, const unsigned n_receive_data);
+  // Send data
+  const int send_data(unsigned char *send_buffer, const unsigned n_send_buffer);
+  
+  // Receive data in buffer (return the number of read data)
+  const int receive_data(unsigned char *receive_buffer, const unsigned n_receive_buffer);
   
   // Get the communication name
   inline std::string communication_name() {return Communication_name;}
@@ -75,8 +78,8 @@ namespace lvc_tools
   inline int baudrate() {return Baudrate;}
   
   // Get the number of data bits
-  inline SERIAL_N_BITS n_data_bits() {return N_data_bits;}
-
+  inline SERIAL_N_DATA_BITS n_data_bits() {return N_data_bits;}
+  
   // Get the parity
   inline SERIAL_PARITY parity() {return Parity;}
 
@@ -98,7 +101,7 @@ namespace lvc_tools
   const int Baudrate;
   
   // Serial communication configuration number of data bits
-  SERIAL_N_BITS N_data_bits;
+  SERIAL_N_DATA_BITS N_data_bits;
   
   // Serial communication configuration parity
   SERIAL_PARITY Parity;
@@ -108,9 +111,14 @@ namespace lvc_tools
   
   // Serial communication status
   SERIAL_STATUS Communication_status;
+
+ private:
+  
+  // Automatically computed from the Port_name
+  int Port_number;
   
  };
  
-}
+} // namespace lvc_tools
 
 #endif // #ifndef CCDATA_TPL_H

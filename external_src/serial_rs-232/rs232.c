@@ -61,8 +61,8 @@ int RS232_OpenComport(int comport_number, int baudrate, const char *mode)
 
   if((comport_number>=RS232_PORTNR)||(comport_number<0))
   {
-    printf("illegal comport number\n");
-    return(1);
+   printf("illegal comport number\n");
+   return(1);
   }
 
   switch(baudrate)
@@ -298,6 +298,7 @@ int RS232_SendByte(int comport_number, unsigned char byte)
 }
 
 
+#if 0
 int RS232_SendBuf(int comport_number, unsigned char *buf, int size)
 {
   int n = write(Cport[comport_number], buf, size);
@@ -315,6 +316,7 @@ int RS232_SendBuf(int comport_number, unsigned char *buf, int size)
 
   return(0);
 }
+#endif // #if 0
 
 
 void RS232_CloseComport(int comport_number)

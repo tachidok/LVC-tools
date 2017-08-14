@@ -15,9 +15,9 @@ namespace lvc_tools
  // ===================================================================
  CCSerial::CCSerial(std::string communication_name,
                     std::string port_name, const unsigned baudrate,
-                    SERIAL_N_BITS n_data_bits = 8BITS,
-                    SERIAL_PARITY Parity = NONE,
-                    SERIAL_STOP_BITS n_stop_bits = ONE)
+                    SERIAL_N_DATA_BITS n_data_bits,
+                    SERIAL_PARITY Parity,
+                    SERIAL_STOP_BITS n_stop_bits)
   : Communication_name(communication_name),
     Port_name(port_name),
     Baudrate(baudrate),
@@ -25,6 +25,9 @@ namespace lvc_tools
     Parity(Parity),
     N_stop_bits(n_stop_bits)
  {
+  // Compute the port number
+  Port_number = RS232_GetPortnr(Port_name.c_str());
+  
   // Initialise connection as disconnected
   Communication_status = SERIAL_DISCONNECTED;
  }
@@ -32,47 +35,42 @@ namespace lvc_tools
  // ===================================================================
  // Destructor
  // ===================================================================
- template<class T>
  CCSerial::~CCSerial()
  {
-  // Change to disconnected state
-  Communication_status = SERIAL_DISCONNECTED;
-  
-  RS232_CloseComport();
+  // Performs a disconnection
+  disconnect();
  }
-
+ 
  // ===================================================================
  // Try to establish a connection
  // ===================================================================
  bool CCSerial::try_to_connect()
- {  
-  // Get the port number
-  const unsigned int port_number = RS232_GetPortnr(Port_name);
-  
+ {
   // Set the mode
   char mode[3];
-  if (N_data_bits == 8BITS)
+  if (N_data_bits == N8BITS)
    {
     mode[0] = '8';
    }
-  else if (N_data_bits == 7BITS)
+  else if (N_data_bits == N7BITS)
    {
     mode[0] = '7';
    }
-  else if (N_data_bits == 6BITS)
+  else if (N_data_bits == N6BITS)
    {
     mode[0] = '6';
    }
-  else if (N_data_bits == 5BITS)
+  else if (N_data_bits == N5BITS)
    {
     mode[0] = '5';
    }
   else
    {
-    ostream error_message;
+    // Error message
+    std::ostringstream error_message;
     error_message << "Non supported number of data bits\nYou asked for ["
                   << N_data_bits << "] n data bits, but the supported ones are:\n"
-                  << "8BITS, 7BITS, 6BITS and 5BITS data bits\n";
+                  << "N8BITS, N7BITS, N6BITS and N5BITS data bits\n";
     ERROR_MESSAGE(error_message);
    }
 
@@ -90,7 +88,8 @@ namespace lvc_tools
    }
   else
    {
-    ostream error_message;
+    // Error message
+    std::ostringstream error_message;
     error_message << "Non supported parity\nYou asked for ["
                   << Parity << "] parity, but the supported ones are:\n"
                   << "NONE, EVEN or ODD\n";
@@ -107,23 +106,76 @@ namespace lvc_tools
    }
   else
    {
-    ostream error_message;
+    // Error message
+    std::ostringstream error_message;
     error_message << "Non supported number of stop bits\nYou asked for ["
                   << N_stop_bits << "] n stop bits, but the supported ones are:\n"
                   << "ONE and TWO\n";
     ERROR_MESSAGE(error_message);
    }
-
+  
   // Try to open the serial port
-  if (RS232_OpenComport(port_number, Baudrate, mode))
+  if (RS232_OpenComport(Port_number, Baudrate, mode))
    {
     return false;
    }
+  
+  std::cout << "Serial communication established ["<< Communication_name << "]" << std::endl;
   
   // Change to connected state
   Communication_status = SERIAL_CONNECTED;
   
   return true;
  }
+
+ // ===================================================================
+ // Disconnects
+ // ===================================================================
+ void CCSerial::disconnect()
+ {
+  if (Communication_status !=SERIAL_DISCONNECTED)
+   {
+    // Change to disconnected state
+    Communication_status = SERIAL_DISCONNECTED;
+    
+    RS232_CloseComport(Port_number);
+   }
   
-}
+  std::cout << "Serial communication disconnected ["<< Communication_name << "]\n";
+  
+ }
+ 
+ // ===================================================================
+ // Send data
+ // ===================================================================
+ const int CCSerial::send_data(unsigned char *send_buffer,
+                               const unsigned n_send_buffer)
+ {
+  // Check that the connection has been established
+  if (Communication_status != SERIAL_CONNECTED)
+   {
+    return -1;
+   }
+  
+  // Send data
+  return RS232_SendBuf(Port_number, send_buffer, n_send_buffer);
+  
+ }
+
+ // ===================================================================
+ // Receive data in buffer (return the number of read data)
+ // ===================================================================
+ const int CCSerial::receive_data(unsigned char *receive_buffer,
+                                  const unsigned n_receive_buffer)
+ {
+  // Check // TODO: hat the connection has been established
+  if (Communication_status != SERIAL_CONNECTED)
+   {
+    return -1;
+   }
+  
+  // Receive data
+  return RS232_PollComport(Port_number, receive_buffer, n_receive_buffer);
+ }
+ 
+} // namespace lvc_tools
