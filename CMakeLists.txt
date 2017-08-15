@@ -22,17 +22,17 @@ MESSAGE( STATUS "PROJECT_PATCH_LEVEL:          " ${chapchom_PATCH_LEVEL})
 # Modify compilation variables
 IF(${LVC-TOOLS_BUILD_VERSION} STREQUAL DEBUG)
   SET(LVC-TOOLS_C_FLAGS "-O0 -g -Wall -pedantic")
-  SET(LVC-TOOLS_CXX_FLAGS "-O0 -g -Wall -pedantic")
+  SET(LVC-TOOLS_CXX_FLAGS "-O0 -g -Wall -pedantic -std=c++11")
 ELSEIF(${LVC-TOOLS_BUILD_VERSION} STREQUAL RELEASE)
   SET(LVC-TOOLS_C_FLAGS "-O3 -Wall -Wextra -Wshadow -Wconversion -pedantic -DNDEBUG")
-  SET(LVC-TOOLS_CXX_FLAGS "-O3 -Wall -Wextra -Wshadow -Wconversion -pedantic -DNDEBUG")
+  SET(LVC-TOOLS_CXX_FLAGS "-O3 -Wall -Wextra -Wshadow -Wconversion -pedantic -std=c++11 -DNDEBUG")
 ELSEIF(${LVC-TOOLS_BUILD_VERSION} STREQUAL PROFILING)
   SET(LVC-TOOLS_C_FLAGS "-O0 -pg -Wall -Wshadow -Wconversion -Wextra -pedantic")
-  SET(LVC-TOOLS_CXX_FLAGS "-O0 -pg -Wall -Wshadow -Wconversion -Wextra -pedantic")  
+  SET(LVC-TOOLS_CXX_FLAGS "-O0 -pg -Wall -Wshadow -Wconversion -Wextra -pedantic -std=c++11")  
   MESSAGE( WARNING "You are compiling with profiling ENABLED, this will SIGNIFICANTLY increase execution times. If you do not want profiling to be ENABLED then choose another version when asked for library version" ) 
 ELSE(${LVC-TOOLS_BUILD_VERSION} STREQUAL DEBUG)
   SET(LVC-TOOLS_C_FLAGS "-O0 -g -Wall -Wextra -pedantic")
-  SET(LVC-TOOLS_CXX_FLAGS "-O0 -g -Wall -Wextra -pedantic")
+  SET(LVC-TOOLS_CXX_FLAGS "-O0 -g -Wall -Wextra -pedantic -std=c++11")
 ENDIF(${LVC-TOOLS_BUILD_VERSION} STREQUAL DEBUG)
 
 # Use this if you require to add more libraries (do not forget to
@@ -74,4 +74,4 @@ ADD_SUBDIRECTORY(src)
 #ADD_SUBDIRECTORY(private)
 
 # Once all source code has been compiled add sub-directories for demos
-#ADD_SUBDIRECTORY(demos)
+ADD_SUBDIRECTORY(demos)

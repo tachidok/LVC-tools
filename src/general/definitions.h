@@ -27,7 +27,9 @@ namespace lvc_tools
 #define TO_DEGREES (180.0/M_PI)
 
  // Error macro
-#define ERROR_MESSAGE(error_message) std::cout << std::endl << "=======================================================================\nERROR\n=======================================================================\nError in file [" << LVC_TOOLS_EXCEPTION_LOCATION << "]\n in function " << LVC_TOOLS_CURRENT_FUNCTION << std::endl << std::endl << error_message << std::endl << std::endl; exit(-1);
+ //#define ERROR_MESSAGE(error_message) std::cout << std::endl << "=======================================================================\nERROR\n=======================================================================\nError in file [" << LVC_TOOLS_EXCEPTION_LOCATION << "]\n in function " << LVC_TOOLS_CURRENT_FUNCTION << std::endl << std::endl << error_message << std::endl << std::endl; exit(-1);
+
+#define ERROR_MESSAGE(error_message) std::cout << std::endl << "=======================================================================\nERROR\n=======================================================================\n";
  
  // =======================================================================
  // The macros to deal with strings for error messages are taken from

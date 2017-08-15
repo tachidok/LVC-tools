@@ -15,11 +15,11 @@ namespace lvc_tools
  
  // Enumerator to indicate whether the connection has been established
  // or not
- enum SERIAL_STATUS {SERIAL_CONNECTED, SERIAL_DISCONNECTED};
+ enum class SERIAL_STATUS {SERIAL_CONNECTED, SERIAL_DISCONNECTED};
  // Enumerators to pass supported values to the serial port configuration
- enum SERIAL_N_DATA_BITS {N8BITS, N7BITS, N6BITS, N5BITS};
- enum SERIAL_PARITY {NONE, EVEN, ODD};
- enum SERIAL_STOP_BITS {ONE, TWO};
+ enum class SERIAL_N_DATA_BITS {N8BITS, N7BITS, N6BITS, N5BITS};
+ enum class SERIAL_PARITY {NONE, EVEN, ODD};
+ enum class SERIAL_STOP_BITS {ONE, TWO};
  
  /// @class CCSerial cc_serial.h
  
@@ -34,11 +34,11 @@ namespace lvc_tools
   // have multiple serial connections. If you are in doubt on the
   // configuration just give it a name, a serial port name and the
   // baudrate, we will take care of the rest
-  CCSerial(std::string communication_name,
-           std::string port_name, const unsigned baudrate,
-           SERIAL_N_DATA_BITS n_data_bits = N8BITS,
-           SERIAL_PARITY parity = NONE,
-           SERIAL_STOP_BITS n_stop_bits = ONE);
+  CCSerial(const char *communication_name,
+           const char *port_name, const unsigned baudrate,
+           SERIAL_N_DATA_BITS n_data_bits = SERIAL_N_DATA_BITS::N8BITS,
+           SERIAL_PARITY parity = SERIAL_PARITY::NONE,
+           SERIAL_STOP_BITS n_stop_bits = SERIAL_STOP_BITS::ONE);
   
   // Copy constructor
   CCSerial(const CCSerial &copy)
@@ -51,6 +51,7 @@ namespace lvc_tools
   CCSerial &operator=(const CCSerial &copy)
    {
     ERROR_MESSAGE("Undefined behaviour for operator '='");
+    return *this;
    }
   
   // Destructor
@@ -69,10 +70,10 @@ namespace lvc_tools
   const int receive_data(unsigned char *receive_buffer, const unsigned n_receive_buffer);
   
   // Get the communication name
-  inline std::string communication_name() {return Communication_name;}
+  inline const char* communication_name() {return Communication_name;}
   
   // Get the port name
-  inline std::string port_name() {return Port_name;}
+  inline const char* port_name() {return Port_name;}
   
   // Get the baudrate
   inline int baudrate() {return Baudrate;}
@@ -92,10 +93,10 @@ namespace lvc_tools
  protected:
   
   // Serial communication name
-  std::string Communication_name;
+  const char* Communication_name;
   
   // Serial communication configuration port name
-  std::string Port_name;
+  const char* Port_name;
   
   // Serial communication configuration baudrate
   const int Baudrate;
