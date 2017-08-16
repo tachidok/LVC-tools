@@ -5,11 +5,12 @@ SET(SRC_demo_serial demo_serial.cpp)
 IF(${LVC-TOOLS_BUILD_DEMOS} STREQUAL TRUE)
   ADD_EXECUTABLE(demo_serial ${SRC_demo_serial})
 ELSE(${LVC-TOOLS_BUILD_DEMOS} STREQUAL TRUE)
-  ADD_EXECUTABLE(demo_serial ${SRC_demo_serial})
+  ADD_EXECUTABLE(demo_serial EXCLUDE_FROM_ALL ${SRC_demo_serial})
 ENDIF(${LVC-TOOLS_BUILD_DEMOS} STREQUAL TRUE)
 
 # Indicate linking libraries
-SET(LIB_demo_serial rs232_lib serial_lib)
+SET(LIB_demo_serial serial_lib rs232_lib) # Reversed dependency order to make it compile
+#SET(LIB_demo_serial rs232_lib serial_lib)
 # ... and link againts them  
 TARGET_LINK_LIBRARIES(demo_serial ${LIB_demo_serial})
 

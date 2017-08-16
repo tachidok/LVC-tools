@@ -37,15 +37,15 @@ int main(int argc, char *argv[])
   {
    ERROR_MESSAGE("Error sending data");
   }
+ 
+ // ---------------------------
+ // Receive data
+ // ---------------------------
+ const unsigned n_receive_buffer = 100;
+ unsigned char *receive_buffer = new unsigned char[n_receive_buffer];
+ memset(receive_buffer, 0, n_receive_buffer);
 
-  // ---------------------------
-  // Receive data
-  // ---------------------------
-  const unsigned n_receive_buffer = 100;
-  unsigned char *receive_buffer = new unsigned char[n_receive_buffer];
-  memset(receive_buffer, 0, n_receive_buffer);
-
-  if (!serial_communication.receive_data(receive_buffer, n_receive_buffer))
+ if (!serial_communication.receive_data(receive_buffer, n_receive_buffer))
  {
   ERROR_MESSAGE("Error receiving data");
  }
