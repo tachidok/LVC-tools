@@ -33,7 +33,9 @@ namespace lvc_tools
   // configuration. Give it a name for easy identification in case you
   // have multiple serial connections. If you are in doubt on the
   // configuration just give it a name, a serial port name and the
-  // baudrate, we will take care of the rest
+  // baudrate, we will take care of the rest. The port name does not
+  // require the "/dev/" substring, it is automatically appened to the
+  // given port name)
   CCSerial(const char *communication_name,
            const char *port_name, const unsigned baudrate,
            SERIAL_N_DATA_BITS n_data_bits = SERIAL_N_DATA_BITS::N8BITS,

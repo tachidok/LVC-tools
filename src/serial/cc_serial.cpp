@@ -19,7 +19,7 @@ namespace lvc_tools
                     SERIAL_PARITY Parity,
                     SERIAL_STOP_BITS n_stop_bits)
   : Communication_name(communication_name),
-    Port_name(port_name),
+    Port_name(port_name), 
     Baudrate(baudrate),
     N_data_bits(n_data_bits),
     Parity(Parity),
@@ -47,7 +47,7 @@ namespace lvc_tools
  bool CCSerial::try_to_connect()
  {
   // Set the mode
-  char mode[3];
+  char *mode = new char[3];
   if (N_data_bits == SERIAL_N_DATA_BITS::N8BITS)
    {
     mode[0] = '8';
@@ -158,10 +158,18 @@ namespace lvc_tools
    }
   
   // Send data
-  return RS232_SendBuf(Port_number, send_buffer, n_send_buffer);
+  int iret = RS232_SendBuf(Port_number, send_buffer, n_send_buffer);
+  if (iret)
+   {
+    return false;
+   }
+  else
+   {
+    return true;
+   }
   
  }
-
+ 
  // ===================================================================
  // Receive data in buffer (return the number of read data)
  // ===================================================================
