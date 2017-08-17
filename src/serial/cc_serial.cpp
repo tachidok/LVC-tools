@@ -146,7 +146,7 @@ namespace lvc_tools
  }
  
  // ===================================================================
- // Send data
+ // Send data (returns the number of sent data)
  // ===================================================================
  const int CCSerial::send_data(unsigned char *send_buffer,
                                const unsigned n_send_buffer)
@@ -158,15 +158,7 @@ namespace lvc_tools
    }
   
   // Send data
-  int iret = RS232_SendBuf(Port_number, send_buffer, n_send_buffer);
-  if (iret)
-   {
-    return false;
-   }
-  else
-   {
-    return true;
-   }
+  return RS232_SendBuf(Port_number, send_buffer, n_send_buffer);
   
  }
  
@@ -184,6 +176,39 @@ namespace lvc_tools
   
   // Receive data
   return RS232_PollComport(Port_number, receive_buffer, n_receive_buffer);
+ }
+
+ // ===================================================================
+ // Send binary data (returns the number of sent data)
+ // ===================================================================
+ const int CCSerial::send_data(void *send_buffer,
+                               const unsigned n_send_buffer)
+ {
+  // Check that the connection has been established
+  if (Communication_status != SERIAL_STATUS::SERIAL_CONNECTED)
+   {
+    return -1;
+   }
+  
+  // Send data
+  return RS232_SendBuf_Binary(Port_number, send_buffer, n_send_buffer);
+  
+ }
+ 
+ // ===================================================================
+ // Receive binary data in buffer (return the number of read data)
+ // ===================================================================
+ const int CCSerial::receive_data(void *receive_buffer,
+                                  const unsigned n_receive_buffer)
+ {
+  // Check // TODO: hat the connection has been established
+  if (Communication_status != SERIAL_STATUS::SERIAL_CONNECTED)
+   {
+    return -1;
+   }
+  
+  // Receive data
+  return RS232_PollComport_Binary(Port_number, receive_buffer, n_receive_buffer);
  }
  
 } // namespace lvc_tools

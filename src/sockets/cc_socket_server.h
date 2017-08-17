@@ -43,6 +43,12 @@ class CCSocketServer
  
  /// Receive data from the socket
  int receive(unsigned char *buffer, const int size);
+
+ /// Send binary data through the socket
+ int send(void *buffer, const int size);
+ 
+ /// Receive binary data from the socket
+ int receive(void *buffer, const int size);
  
  private:
 

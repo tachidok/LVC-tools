@@ -71,7 +71,7 @@ ADD_SUBDIRECTORY(src)
 
 # Add private folders (note that any source code in here is not
 # compiled but only added to the make list)
-#ADD_SUBDIRECTORY(private)
+ADD_SUBDIRECTORY(private)
 
 # Once all source code has been compiled add sub-directories for demos
 ADD_SUBDIRECTORY(demos)

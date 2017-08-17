@@ -277,43 +277,58 @@ int RS232_PollComport(int comport_number, unsigned char *buf, int size)
  return(n);
 }
 
+int RS232_PollComport_Binary(int comport_number, void *buf, int size)
+{
+ int n;
+ 
+ n = read(Cport[comport_number], buf, size);
+
+ if(n < 0)
+  {
+   if(errno == EAGAIN)  return 0;
+  }
+
+ return(n);
+}
 
 int RS232_SendByte(int comport_number, unsigned char byte)
 {
  int n = write(Cport[comport_number], &byte, 1);
+
  if(n < 0)
   {
-   if(errno == EAGAIN)
-    {
-     return 0;
-    }
-   else
-    {
-     return 1;
-    }
+   if(errno == EAGAIN)  return 0;
   }
 
- return(0);
+ return(n);
+ 
 }
 
 int RS232_SendBuf(int comport_number, unsigned char *buf, int size)
 {
  int n = write(Cport[comport_number], buf, size);
+
  if(n < 0)
   {
-   if(errno == EAGAIN)
-    {
-     return 0;
-    }
-   else
-    {
-     return 1;
-    }
+   if(errno == EAGAIN)  return 0;
   }
 
- return(0);
+ return(n);
+ 
 }
 
+int RS232_SendBuf_Binary(int comport_number, void *buf, int size)
+{
+ int n = write(Cport[comport_number], buf, size);
+
+ if(n < 0)
+  {
+   if(errno == EAGAIN)  return 0;
+  }
+
+ return(n);
+ 
+}
 
 void RS232_CloseComport(int comport_number)
 {
@@ -669,7 +684,6 @@ int RS232_SendByte(int comport_number, unsigned char byte)
  return(0);
 }
 
-
 int RS232_SendBuf(int comport_number, unsigned char *buf, int size)
 {
  int n;
@@ -681,7 +695,6 @@ int RS232_SendBuf(int comport_number, unsigned char *buf, int size)
 
  return(-1);
 }
-
 
 void RS232_CloseComport(int comport_number)
 {
@@ -772,7 +785,6 @@ void RS232_flushRXTX(int comport_number)
 
 
 #endif
-
 
 void RS232_cputs(int comport_number, const char *text)  /* sends a string to serial port */
 {

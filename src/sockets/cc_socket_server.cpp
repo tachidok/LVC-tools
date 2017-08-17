@@ -29,8 +29,12 @@ CCSocketServer::~CCSocketServer()
  stop();
 }
 
+/// ==================================================================
+/// Start the server and waits for incomming connections from clients
+/// (blocking)
+/// ==================================================================
 bool CCSocketServer::start()
-{ 
+{
  // A data structure to store client lenght information
  socklen_t client_length;
  
@@ -105,6 +109,9 @@ bool CCSocketServer::start()
 
 }
 
+/// ==================================================================
+/// Stop the server
+/// ==================================================================
 void CCSocketServer::stop()
 {
  if (Status == SERVER_CONNECTED)
@@ -125,7 +132,10 @@ void CCSocketServer::stop()
   }
  
 }
- 
+
+/// ==================================================================
+/// Send data through the socket
+/// ==================================================================
 int CCSocketServer::send(unsigned char *buffer, const int size)
 {
  // Check that the server is connected with a client
@@ -139,7 +149,42 @@ int CCSocketServer::send(unsigned char *buffer, const int size)
  
 }
 
+/// ==================================================================
+/// Receive data from the socket
+/// ==================================================================
 int CCSocketServer::read(unsigned char *buffer, const int size)
+{
+ // Check that the server is connected with a client
+ if (Status != SERVER_CONNECTED)
+  {
+   return -1;
+  }
+ 
+ // Get the data and the number of received data
+ return ::read(FD_client, buffer, size);
+ 
+}
+
+/// ==================================================================
+/// Send binary data through the socket
+/// ==================================================================
+int CCSocketServer::send(void *buffer, const int size)
+{
+ // Check that the server is connected with a client
+ if (Status != SERVER_CONNECTED)
+  {
+   return -1;
+  }
+
+ // Send data and get the number of sent data
+ return ::write(FD_client, buffer, size);
+ 
+}
+
+/// ==================================================================
+/// Receive binary data from the socket
+/// ==================================================================
+int CCSocketServer::read(void *buffer, const int size)
 {
  // Check that the server is connected with a client
  if (Status != SERVER_CONNECTED)
