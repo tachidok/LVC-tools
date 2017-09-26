@@ -29,6 +29,8 @@ namespace lvc_tools
  // Error macro
  //#define ERROR_MESSAGE(error_message) std::cout << std::endl << "=======================================================================\nERROR\n=======================================================================\nError in file [" << LVC_TOOLS_EXCEPTION_LOCATION << "]\n in function " << LVC_TOOLS_CURRENT_FUNCTION << std::endl << std::endl << error_message << std::endl << std::endl; exit(-1);
 
+ //#define ERROR_MESSAGE(error_message) std::cout << std::endl << "=======================================================================\nERROR\n=======================================================================\n"<<error_message<<std::endl << "=======================================================================\nERROR\n=======================================================================\n";
+
 #define ERROR_MESSAGE(error_message) std::cout << std::endl << "=======================================================================\nERROR\n=======================================================================\n";
  
  // =======================================================================
@@ -77,5 +79,5 @@ namespace lvc_tools
 
 }
  
-#endif // #ifdef DEFINITIONS_H
+#endif // #ifndef DEFINITIONS_H
 

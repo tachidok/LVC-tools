@@ -10,7 +10,7 @@ using namespace lvc_tools;
 
 int main(int argc, char *argv[])
 {
- // Open the file from where we get the data that will be sent throght
+ // Open the file from where we get the data that will be sent through
  // the serial port
  std::ifstream input_file("validate/validate_demo_serial.dat", std::ios_base::in);
  
