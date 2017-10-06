@@ -3,7 +3,7 @@
 /// ==================================================================
 /// Constructor
 /// ==================================================================
-CCSocketServer::CCSocketServer(string server_name, const int listening_port) 
+CCSocketServer::CCSocketServer(std::string server_name, const int listening_port) 
 {
  /// Initiliase file descriptors
  FD_server = -1;

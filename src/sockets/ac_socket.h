@@ -1,8 +1,7 @@
 #ifndef AC_SOCKET_H
 #define AC_SOCKET_H
 
-#include <string>
-#include <iostream>
+#include "../general/common_includes.h"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -27,16 +26,16 @@ namespace lvc_tools
  class ACSocket
  {
  public:
- 
+  
   /// Constructor
-  ACSocket();
- 
+  ACSocket(std::string client_name, std::string server_to_connect_name, const int port);
+  
   /// Destructor
   virtual ~ACSocket();
   
   /// Connects (blocking behaviour, calls "try_to_connect()" until success)
   virtual bool connect() = 0;
- 
+  
   /// Tries to connect
   virtual bool try_to_connect() = 0;
  
@@ -48,18 +47,30 @@ namespace lvc_tools
  
   /// Receive data from the socket
   virtual int receive(unsigned char *buffer, const int size) = 0;
+  
+  /// Send data through the socket
+  virtual int send(void *buffer, const int size) = 0;
  
+  /// Receive data from the socket
+  virtual int receive(void *buffer, const int size) = 0;
+  
  protected:
- 
+
+  /// Stores the client name
+  string Client_name;
+  
+  /// The host/server to connect name
+  string Server_to_connect_name;
+  
   /// A file descriptor
   int FD;
- 
-  /// The port used by the socket
+  
+  /// The port to connect the socket
   int Port;
  
   /// Stores the socket current status
-  Socket_status Status;
- 
+  Client_socket_status Status;  
+  
  };
 
 } // namespace lvc_tools

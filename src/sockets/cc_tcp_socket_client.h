@@ -1,32 +1,43 @@
-#ifndef CCCOMMUNICATIONCLIENT_H
-#define CCCOMMUNICATIONCLIENT_H
+#ifndef CCTCPSOCKETCLIENT_H
+#define CCTCPSOCKETCLIENT_H
 
-#include "CACommunicationEthernet.h"
-#include "Common/CCConfigFile.h"
-#include "Report/CCReport.h"
-#include "Report/CCMonitor.h"
+#include "ac_socket.h"
 
-using namespace std;
-
-class CCCommunicationClient : public CACommunicationEthernet
+namespace lvc_tools
 {
+ class CCTCPSocketClient : public virtual ACSocket
+ {
+ public:
+ 
+  /// Constructor
+  CCTCPSocketClient(std::string client_name, std::string server_to_connect_name, const int port);
+  
+  /// Destructor
+  virtual ~CCTCPSocketClient();
+  
+  /// Connects (blocking behaviour, calls "try_to_connect()" until success)
+  bool connect();
+ 
+  /// Tries to connect
+  bool try_to_connect();
+  
+  /// Disconnect
+  void disconnect();
+  
+  /// Send data through the socket
+  int send(unsigned char *buffer, const int size);
+  
+  /// Receive data from the socket
+  int receive(unsigned char *buffer, const int size);
+  
+  /// Send data through the socket
+  int send(void *buffer, const int size);
+  
+  /// Receive data from the socket
+  int receive(void *buffer, const int size); 
+  
+ };
+ 
+} // namespace lvc_tools
 
-public:
-    CCCommunicationClient(const string &_configFile, const string &classname);
-    ~CCCommunicationClient();
-
-    void initialization(const string &_configFile, const string &classname);//Configurar el servidor o el cliente
-    bool openCommunication(); //Abrir la conexion
-    void closeCommunication(); //cerrar la conexion
-    void reconnect(); //Cerrar y volver a abrir la conexion
-    int write(unsigned char *_buffer, int size); //Enviar datos
-    int write_bin(void *_buffer, int size); //Enviar datos
-    int read(unsigned char *_buffer, int size); //Recibir datos
-
-protected:
-
-    string host_name;
-
-};
-
-#endif // CCCOMMUNICATIONCLIENT_H
+#endif // CCTCPSOCKETCLIENT_H
