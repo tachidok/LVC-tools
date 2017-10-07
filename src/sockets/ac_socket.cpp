@@ -6,15 +6,15 @@ namespace lvc_tools
  /// ==================================================================
  /// Constructor
  /// ==================================================================
- ACSocket::ACSocket(std::string client_name,
-                    std::string server_to_connect_name,
+ ACSocket::ACSocket(std::string client_ID,
+                    std::string server_name,
                     const int port)
  { 
   // Store the name of the client
-  Client_name = client_name;
+  Client_ID = client_ID;
   
   // Copy the server to connect
-  Server_to_connect_name = server_to_connect_name;
+  Server_name = server_name;
   
   /// Initialise the file descriptor
   FD = 0;

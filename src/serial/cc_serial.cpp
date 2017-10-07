@@ -148,8 +148,8 @@ namespace lvc_tools
  // ===================================================================
  // Send data (returns the number of sent data)
  // ===================================================================
- const int CCSerial::send_data(unsigned char *send_buffer,
-                               const unsigned n_send_buffer)
+ const int CCSerial::send(unsigned char *send_buffer,
+                          const unsigned n_send_buffer)
  {
   // Check that the connection has been established
   if (Communication_status != SERIAL_STATUS::SERIAL_CONNECTED)
@@ -165,8 +165,8 @@ namespace lvc_tools
  // ===================================================================
  // Receive data in buffer (return the number of read data)
  // ===================================================================
- const int CCSerial::receive_data(unsigned char *receive_buffer,
-                                  const unsigned n_receive_buffer)
+ const int CCSerial::receive(unsigned char *receive_buffer,
+                             const unsigned n_receive_buffer)
  {
   // Check // TODO: hat the connection has been established
   if (Communication_status != SERIAL_STATUS::SERIAL_CONNECTED)
@@ -181,8 +181,8 @@ namespace lvc_tools
  // ===================================================================
  // Send binary data (returns the number of sent data)
  // ===================================================================
- const int CCSerial::send_data(void *send_buffer,
-                               const unsigned n_send_buffer)
+ const int CCSerial::send(void *send_buffer,
+                          const unsigned n_send_buffer)
  {
   // Check that the connection has been established
   if (Communication_status != SERIAL_STATUS::SERIAL_CONNECTED)
@@ -198,8 +198,8 @@ namespace lvc_tools
  // ===================================================================
  // Receive binary data in buffer (return the number of read data)
  // ===================================================================
- const int CCSerial::receive_data(void *receive_buffer,
-                                  const unsigned n_receive_buffer)
+ const int CCSerial::receive(void *receive_buffer,
+                             const unsigned n_receive_buffer)
  {
   // Check // TODO: hat the connection has been established
   if (Communication_status != SERIAL_STATUS::SERIAL_CONNECTED)

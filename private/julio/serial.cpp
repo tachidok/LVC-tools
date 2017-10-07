@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
    // ---------------------------
    // Receive data
    // ---------------------------
-   if (!serial_communication.receive_data(receive_buffer, n_receive_buffer))
+   if (!serial_communication.receive(receive_buffer, n_receive_buffer))
     {
      ERROR_MESSAGE("Error receiving data");
     }

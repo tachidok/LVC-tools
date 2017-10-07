@@ -5,10 +5,10 @@ namespace lvc_tools
  /// ==================================================================
  /// Constructor
  /// ==================================================================
- CCTCPSocketClient(std::string client_name,
-                   std::string server_to_connect_name,
-                   const int port)
-  : ACSocket(client_name, server_to_connect_name, port)
+ CCTCPSocketClient::CCTCPSocketClient(std::string client_ID,
+                                      std::string server_name,
+                                      const int port)
+  : ACSocket(client_ID, server_name, port)
  {
     
  }
@@ -17,13 +17,12 @@ namespace lvc_tools
  /// Destructor
  /// ==================================================================
  CCTCPSocketClient::~CCTCPSocketClient()
- { }
-
- /// Destructor
- virtual ~CCTCPSocketClient();
-
+ {
+  disconnect();
+ }
+ 
  /// ==================================================================
- /// Connects (blocking behaviour, calls "try_to_connect()" until success)
+ /// Connects with a server (blocking behaviour)
  /// ==================================================================
  bool CCTCPSocketClient::connect()
  {
@@ -32,61 +31,54 @@ namespace lvc_tools
    {
     return true;
    }
-
-  // If not connnect then open a socket
-  struct sockaddr_in serv_addr;
-  struct hostent *server;
   
-  // Open the socket
-  
-  //used address the internet domain and stream sockets treat communications as a continuous stream of characters
+  // Create the socket
   FD = socket(AF_INET, SOCK_STREAM, 0);
-
-  if (fd < 0) {
-   status = CI_DISCONNECTED;
-   report.errorMessage(string(__PRETTY_FUNCTION__) + ": opening socket");
-   return false;
-  }
-
+  
+  if (FD < 0)
+   {
+    Status = CLIENT_SOCKET_DISCONNECTED;
+    return false;
+   }
+  
+  // Structure to store the server name
+  struct hostent *server;
   //Get host name
-  server = gethostbyname(host_name.c_str());
-
-  if (server == NULL) {
-   status = CI_DISCONNECTED;
-   close(fd);
-   report.errorMessage(string(__PRETTY_FUNCTION__) + ": Host not found");
-   return false;
-  }
-
+  server = gethostbyname(Server_name.c_str());
+  
+  if (server == NULL)
+   {
+    Status = CLIENT_SOCKET_DISCONNECTED;
+    close(FD);
+    return false;
+   }
+  
+  // Structure to store server connection configuration
+  struct sockaddr_in serv_addr;
+  // Fill with zeroes
   bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
   bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
+  // Set the port
+  serv_addr.sin_port = htons(Port);
+  
+  // Connect ... [blocking]
+  if (::connect(FD, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+   {
+    Status = CLIENT_SOCKET_DISCONNECTED;
+    close(FD);
+    return false;
+   }
 
-  serv_addr.sin_port = htons(port);
-
-  //printf("Cliente: Solicitar conexion\n");
-
-  if (connect(fd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
-   status = CI_DISCONNECTED;
-   close(fd);
-   //report.errorMessage(string(__PRETTY_FUNCTION__) + ": The client could not connect");
-   return false;
-  }
-
-  status = CI_CONNECTED;
-
+  // Connection established
+  Status = CLIENT_SOCKET_CONNECTED;
+  
+  std::cout << "Socket CLIENT [" << Client_ID << "] connected" << std::endl;
+  
   return true;
   
  }
-
- /// ==================================================================
- /// Tries to connect
- /// ==================================================================
- bool CCTCPSocketClient::try_to_connect()
- {
-  
- }
-
+ 
  /// ==================================================================
  /// Disconnect
  /// ==================================================================
@@ -100,6 +92,9 @@ namespace lvc_tools
       close(FD);
      }
    }
+  
+  std::cout << "Socket CLIENT [" << Client_ID << "] disconnected" << std::endl;
+  
  }
  
  /// ==================================================================
@@ -135,7 +130,7 @@ namespace lvc_tools
  /// ==================================================================
  /// Send data through the socket
  /// ==================================================================
- int CCTCPSocketClient::send(void *buffer, const int size)
+ int CCTCPSocketClient::send(void *buffer, const int n_send_bytes)
  {
   // Check that the cient is connected with a server
   if (Status != CLIENT_SOCKET_CONNECTED)
@@ -144,13 +139,13 @@ namespace lvc_tools
    }
   
   // Send data and get the number of sent data
-  return ::write(FD, buffer, size);
+  return ::write(FD, buffer, n_send_bytes);
  }
  
  /// ==================================================================
  /// Receive data from the socket
  /// ==================================================================
- int CCTCPSocketClient::receive(void *buffer, const int size)
+ int CCTCPSocketClient::receive(void *buffer, const int n_receive_bytes)
  {
   // Check that the client is connected with a server
   if (Status != CLIENT_SOCKET_CONNECTED)
@@ -159,68 +154,7 @@ namespace lvc_tools
    }
   
   // Get the data and the number of received data
-  return ::read(FD, buffer, size);
+  return ::read(FD, buffer, n_receive_bytes);
  }
 
 } // namespace lvc_tools
-
-bool CCCommunicationClient::openCommunication()
-{
-
- struct sockaddr_in serv_addr;
- struct hostent *server;
-
- //check that  is not already connected
- if (status == CI_CONNECTED){
-  //report.warningMessage(string(__PRETTY_FUNCTION__) + ": already connected");
-  return true;
- }
-
- // Open socket
- //used address the internet domain and stream sockets treat communications as a continuous stream of characters
- fd = socket(AF_INET, SOCK_STREAM, 0);
-
- if (fd < 0) {
-  status = CI_DISCONNECTED;
-  report.errorMessage(string(__PRETTY_FUNCTION__) + ": opening socket");
-  return false;
- }
-
- //Get host name
- server = gethostbyname(host_name.c_str());
-
- if (server == NULL) {
-  status = CI_DISCONNECTED;
-  close(fd);
-  report.errorMessage(string(__PRETTY_FUNCTION__) + ": Host not found");
-  return false;
- }
-
- bzero((char *) &serv_addr, sizeof(serv_addr));
- serv_addr.sin_family = AF_INET;
- bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
-
- serv_addr.sin_port = htons(port);
-
- //printf("Cliente: Solicitar conexion\n");
-
- if (connect(fd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
-  status = CI_DISCONNECTED;
-  close(fd);
-  //report.errorMessage(string(__PRETTY_FUNCTION__) + ": The client could not connect");
-  return false;
- }
-
- status = CI_CONNECTED;
-
- return true;
-
-}
-
-void CCCommunicationClient::reconnect()
-{
- closeCommunication();
- openCommunication();
-}
-
-

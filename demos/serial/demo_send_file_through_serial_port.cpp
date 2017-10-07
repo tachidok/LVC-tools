@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
  // Open the file from where we get the data that will be sent through
  // the serial port
- std::ifstream input_file("validate/serial_send_file.dat", std::ios_base::in | std::ios::binary);
+ std::ifstream input_file("validate/demo_send_file_through_serial_port.dat", std::ios_base::in | std::ios::binary);
  if (input_file.fail())
   {
    ERROR_MESSAGE("We could not open the file that is sent through the serial port");
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
    // -------------
    // Number of bytes to send
    const unsigned n_send_byte = 1;
-   if (!serial_communication.send_data(&byte, n_send_byte))
+   if (!serial_communication.send(&byte, n_send_byte))
     {
      ERROR_MESSAGE("Error sending data");
     }

@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 
 #include <termios.h>
@@ -29,7 +30,7 @@ namespace lvc_tools
  public:
  
   /// Constructor
-  CCSocketServer(std::string server_name, const int listening_port);
+  CCSocketServer(std::string server_ID, std::string server_name, const int listening_port);
  
   /// Destructor
   ~CCSocketServer();
@@ -47,16 +48,19 @@ namespace lvc_tools
   int receive(unsigned char *buffer, const int size);
 
   /// Send binary data through the socket
-  int send(void *buffer, const int size);
+  int send(void *buffer, const int n_send_bytes);
  
   /// Receive binary data from the socket
-  int receive(void *buffer, const int size);
+  int receive(void *buffer, const int n_receive_bytes);
  
  private:
-
+  
+  /// Stores the server ID
+  std::string Server_ID;
+  
   /// Stores the server name
-  string Server_name;
- 
+  std::string Server_name;
+  
   /// File descriptor for the server
   int FD_server;
 

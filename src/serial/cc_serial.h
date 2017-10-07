@@ -66,16 +66,16 @@ namespace lvc_tools
   void disconnect();
   
   // Send data (returns the number of sent data)
-  const int send_data(unsigned char *send_buffer, const unsigned n_send_buffer);
+  const int send(unsigned char *send_buffer, const unsigned n_send_buffer);
   
   // Receive data in buffer (returns the number of read data)
-  const int receive_data(unsigned char *receive_buffer, const unsigned n_receive_buffer);
+  const int receive(unsigned char *receive_buffer, const unsigned n_receive_buffer);
 
   // Send binary data (returns the number of sent data)
-  const int send_data(void *send_buffer, const unsigned n_send_buffer);
+  const int send(void *send_buffer, const unsigned n_send_buffer);
   
   // Receive binary data in buffer (return the number of read data)
-  const int receive_data(void *receive_buffer, const unsigned n_receive_buffer);
+  const int receive(void *receive_buffer, const unsigned n_receive_buffer);
   
   // Get the communication name
   inline const char* communication_name() {return Communication_name;}

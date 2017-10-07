@@ -10,16 +10,13 @@ namespace lvc_tools
  public:
  
   /// Constructor
-  CCTCPSocketClient(std::string client_name, std::string server_to_connect_name, const int port);
+  CCTCPSocketClient(std::string client_ID, std::string server_name, const int port);
   
   /// Destructor
   virtual ~CCTCPSocketClient();
   
-  /// Connects (blocking behaviour, calls "try_to_connect()" until success)
+  /// Connects with a server (blocking behaviour)
   bool connect();
- 
-  /// Tries to connect
-  bool try_to_connect();
   
   /// Disconnect
   void disconnect();
@@ -31,10 +28,10 @@ namespace lvc_tools
   int receive(unsigned char *buffer, const int size);
   
   /// Send data through the socket
-  int send(void *buffer, const int size);
+  int send(void *buffer, const int n_send_bytes);
   
   /// Receive data from the socket
-  int receive(void *buffer, const int size); 
+  int receive(void *buffer, const int n_receive_bytes); 
   
  };
  

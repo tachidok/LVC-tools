@@ -28,17 +28,14 @@ namespace lvc_tools
  public:
   
   /// Constructor
-  ACSocket(std::string client_name, std::string server_to_connect_name, const int port);
+  ACSocket(std::string client_ID, std::string server_name, const int port);
   
   /// Destructor
   virtual ~ACSocket();
   
-  /// Connects (blocking behaviour, calls "try_to_connect()" until success)
+  /// Connects with a server (blocking behaviour)
   virtual bool connect() = 0;
   
-  /// Tries to connect
-  virtual bool try_to_connect() = 0;
- 
   /// Disconnect
   virtual void disconnect() = 0;
  
@@ -49,18 +46,18 @@ namespace lvc_tools
   virtual int receive(unsigned char *buffer, const int size) = 0;
   
   /// Send data through the socket
-  virtual int send(void *buffer, const int size) = 0;
+  virtual int send(void *buffer, const int n_send_bytes) = 0;
  
   /// Receive data from the socket
-  virtual int receive(void *buffer, const int size) = 0;
+  virtual int receive(void *buffer, const int n_receive_bytes) = 0;
   
  protected:
 
-  /// Stores the client name
-  string Client_name;
+  /// Stores the client ID
+  std::string Client_ID;
   
   /// The host/server to connect name
-  string Server_to_connect_name;
+  std::string Server_name;
   
   /// A file descriptor
   int FD;
